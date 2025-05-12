@@ -1,0 +1,36 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output folders
+/bin/
+/out/
+/dist/
+/build/
+/cmd/main
+
+# Logs and temp files
+*.log
+*.cache
+*.tmp
+
+# Dependency directories
+/vendor/
+pkg/mod/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
