@@ -4,7 +4,6 @@ import (
 	"awesomeProject/config"
 	"awesomeProject/controllers"
 	"awesomeProject/database"
-	"awesomeProject/middlewares"
 	"awesomeProject/repositories"
 	"awesomeProject/services"
 	"awesomeProject/utils"
@@ -44,12 +43,6 @@ func main() {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authController.Login)
-		}
-
-		candidates := api.Group("/")
-		{
-			candidates.Use(middlewares.AuthMiddleware(jwtConfig))
-			candidates.GET("/candidates", candidateController.List)
 		}
 	}
 
