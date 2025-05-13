@@ -3,50 +3,36 @@ package services
 import (
 	"awesomeProject/models"
 	"awesomeProject/repositories"
-	"awesomeProject/utils"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type CandidateService interface {
 	List(batch string) ([]*models.Candidate, error)
-	Login(credentials *models.LoginRequest) (*models.AuthResponse, error)
+	Create(candidates []*models.Candidate) error
 }
 
-type authService struct {
-	userRepository repositories.UserRepository
-	config         *utils.JWTConfig
+type candidateService struct {
+	candidateRepository repositories.CandidateRepository
 }
 
-func NewAuthService(userRepo repositories.UserRepository, config *utils.JWTConfig) AuthService {
-	return &authService{
-		userRepository: userRepo,
-		config:         config,
+func NewCandidateService(candidateRepository repositories.CandidateRepository) CandidateService {
+	return &candidateService{
+		candidateRepository: candidateRepository,
 	}
 }
 
-func (s *authService) Login(req *models.LoginRequest) (*models.AuthResponse, error) {
-	user, err := s.userRepository.FindByNik(req.Nik)
+func (s *candidateService) List(batch string) ([]*models.Candidate, error) {
+	candidates, err := s.candidateRepository.FindByBatch(batch)
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
-		return nil, errors.New("invalid credentials")
+	return candidates, nil
+}
+
+func (s *candidateService) Create(candidates []*models.Candidate) error {
+	if len(candidates) == 0 {
+		return errors.New("no candidates to create")
 	}
 
-	// Compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, errors.New("invalid credentials")
-	}
-
-	// Generate token
-	token, err := s.config.GenerateToken(user.Nik)
-	if err != nil {
-		return nil, err
-	}
-
-	return &models.AuthResponse{
-		Token: token,
-		User:  user,
-	}, nil
+	return s.candidateRepository.Create(candidates)
 }
