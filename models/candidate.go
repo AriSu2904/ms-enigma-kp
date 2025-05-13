@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+	"time"
+)
 
 type Candidate struct {
 	ID            string    `json:"id" gorm:"type:uuid;primaryKey"`
@@ -15,14 +19,16 @@ type Candidate struct {
 	Experience    int       `json:"experience"`
 	SoftSkillTest float64   `json:"soft_skill_test"`
 	MathTest      float64   `json:"math_test"`
-	SkExp         float64   `json:"sk_exp"`
-	BasicTest     float64   `json:"basic_test"`
 	CodingTest    float64   `json:"coding_test"`
 	TotalSkills   int       `json:"total_skills"`
-	TotalScore    float64   `json:"total_score"`
 	Status        string    `json:"status"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+func (s *Candidate) BeforeCreate(tx *gorm.DB) (err error) {
+	s.ID = uuid.New().String()
+	return
 }
 
 type CandidateResponse struct {
@@ -39,6 +45,5 @@ type CandidateResponse struct {
 	SoftSkillTest float64   `json:"soft_skill_test"`
 	MathTest      float64   `json:"math_test"`
 	CodingTest    float64   `json:"coding_test"`
-	TotalScore    float64   `json:"total_score"`
 	Status        string    `json:"status"`
 }

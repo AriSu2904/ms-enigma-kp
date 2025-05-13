@@ -9,6 +9,7 @@ import (
 type CandidateRepository interface {
 	Create(candidates []*models.Candidate) error
 	FindByBatch(batch string) ([]*models.Candidate, error)
+	FindById(id string) (*models.Candidate, error)
 }
 
 type candidateRepository struct {
@@ -38,4 +39,13 @@ func (r *candidateRepository) FindByBatch(batch string) ([]*models.Candidate, er
 		return nil, err
 	}
 	return candidates, nil
+}
+
+func (r *candidateRepository) FindById(id string) (*models.Candidate, error) {
+	var candidate models.Candidate
+	err := r.db.Where("id = ?", id).First(&candidate).Error
+	if err != nil {
+		return nil, err
+	}
+	return &candidate, nil
 }

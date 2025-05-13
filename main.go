@@ -4,6 +4,7 @@ import (
 	"awesomeProject/config"
 	"awesomeProject/controllers"
 	"awesomeProject/database"
+	"awesomeProject/development"
 	"awesomeProject/repositories"
 	"awesomeProject/services"
 	"awesomeProject/utils"
@@ -31,10 +32,19 @@ func main() {
 	//	log.Printf("Failed to seed admin user: %v", err)
 	//}
 
+	// inject candidate
+	seeder := development.NewSeeder(db)
+	if err := seeder.SeedCandidate(); err != nil {
+		log.Printf("Failed to seed candidate: %v", err)
+	}
+
 	jwtConfig := utils.NewJWTConfig(cfg.JWTSecret, 24*time.Hour)
 	userRepo := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(userRepo, jwtConfig)
 	authController := controllers.NewAuthController(authService)
+	candidateRepository := repositories.NewCandidateRepository(db)
+	candidateService := services.NewCandidateService(candidateRepository)
+	candidateController := controllers.NewCandidateController(candidateService)
 
 	router := gin.Default()
 
@@ -43,6 +53,12 @@ func main() {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authController.Login)
+		}
+
+		candidates := api.Group("/candidates")
+		{
+			candidates.GET("", candidateController.List)
+			candidates.POST("/predict/:id", candidateController.PredictById)
 		}
 	}
 
