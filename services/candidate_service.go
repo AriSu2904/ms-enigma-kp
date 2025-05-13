@@ -10,7 +10,7 @@ type CandidateService interface {
 	List(batch string) ([]*models.Candidate, error)
 	Create(candidates []*models.Candidate) error
 	PredictByBatch(batch string) ([]*models.Candidate, error)
-	PredictById(id string) (*models.Candidate, error)
+	PredictById(id string) ([]*models.Candidate, error)
 }
 
 type candidateService struct {
@@ -18,9 +18,10 @@ type candidateService struct {
 	predictorService    PredictorService
 }
 
-func NewCandidateService(candidateRepository repositories.CandidateRepository) CandidateService {
+func NewCandidateService(candidateRepository repositories.CandidateRepository, pr PredictorService) CandidateService {
 	return &candidateService{
 		candidateRepository: candidateRepository,
+		predictorService:    pr,
 	}
 }
 
@@ -48,7 +49,7 @@ func (s *candidateService) PredictByBatch(batch string) ([]*models.Candidate, er
 	return candidates, nil
 }
 
-func (s *candidateService) PredictById(id string) (*models.Candidate, error) {
+func (s *candidateService) PredictById(id string) ([]*models.Candidate, error) {
 	candidate, err := s.candidateRepository.FindById(id)
 	if err != nil {
 		return nil, err
@@ -58,5 +59,9 @@ func (s *candidateService) PredictById(id string) (*models.Candidate, error) {
 		return nil, errors.New("candidate not found")
 	}
 
-	return candidate, nil
+	prediction, err := s.predictorService.MachineLearningPrediction([]*models.Candidate{candidate})
+	if err != nil {
+		return nil, err
+	}
+	return prediction, nil
 }

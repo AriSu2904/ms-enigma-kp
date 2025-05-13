@@ -7,7 +7,7 @@ import (
 )
 
 type PredictorService interface {
-	MachineLearningPrediction(candidate []*models.Candidate) (*[]models.Candidate, error)
+	MachineLearningPrediction(candidate []*models.Candidate) ([]*models.Candidate, error)
 }
 
 type predictorService struct {
@@ -20,7 +20,7 @@ func NewPredictorService(machineLearningConnector connector.MachineLearningConne
 	}
 }
 
-func (s *predictorService) MachineLearningPrediction(candidate []*models.Candidate) (*[]models.Candidate, error) {
+func (s *predictorService) MachineLearningPrediction(candidate []*models.Candidate) ([]*models.Candidate, error) {
 	var modelRequests []*connector.ModelRequest
 	for _, c := range candidate {
 		modelRequests = append(modelRequests, &connector.ModelRequest{
@@ -38,14 +38,14 @@ func (s *predictorService) MachineLearningPrediction(candidate []*models.Candida
 		return nil, errors.New("failed to get predictions")
 	}
 
-	var predictedCandidates []models.Candidate
-	for _, r := range modelResponses {
-		predictedCandidates = append(predictedCandidates, models.Candidate{
-			ID:       r.Id,
-			FullName: r.Name,
-			Status:   r.Status,
+	var candidates []*models.Candidate
+	for _, response := range modelResponses {
+		candidates = append(candidates, &models.Candidate{
+			ID:       response.Id,
+			FullName: response.Name,
+			Status:   response.Status,
+			// PredictedStatus: response.PredictedStatus,
 		})
 	}
-
-	return &predictedCandidates, nil
+	return candidates, nil
 }

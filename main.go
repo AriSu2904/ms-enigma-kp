@@ -2,6 +2,7 @@ package main
 
 import (
 	"awesomeProject/config"
+	"awesomeProject/connector"
 	"awesomeProject/controllers"
 	"awesomeProject/database"
 	"awesomeProject/development"
@@ -42,8 +43,10 @@ func main() {
 	userRepo := repositories.NewUserRepository(db)
 	authService := services.NewAuthService(userRepo, jwtConfig)
 	authController := controllers.NewAuthController(authService)
+	machineLearningConnector := connector.NewMachineLearningConnector()
 	candidateRepository := repositories.NewCandidateRepository(db)
-	candidateService := services.NewCandidateService(candidateRepository)
+	predictorService := services.NewPredictorService(machineLearningConnector)
+	candidateService := services.NewCandidateService(candidateRepository, predictorService)
 	candidateController := controllers.NewCandidateController(candidateService)
 
 	router := gin.Default()
